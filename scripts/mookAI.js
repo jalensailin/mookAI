@@ -192,10 +192,10 @@ export class MookAI {
     });
 
     Hooks.on("createCombatant", (combatant_, config_, id_) => {
-      this.addCombatant(id_, combatant_.data.tokenId);
+      this.addCombatant(combatant_.combat.id, combatant_.data.tokenId);
     });
     Hooks.on("deleteCombatant", (combatant_, config_, id_) => {
-      this.deleteCombatant(id_, combatant_.data.tokenId);
+      this.deleteCombatant(combatant_.combat, combatant_.data.tokenId);
     });
     Hooks.on("createCombat", (combat_, config_, id_) => {
       this.combatStart(combat_);
@@ -311,7 +311,7 @@ export class MookAI {
   }
 
   combatStart(combat_) {
-    if (combat_.data.scene !== game.scenes.active.id) return;
+    if (combat_.data.scene.id !== game.scenes.active.id) return;
 
     if (this.combats.get(combat_.id)) {
       console.log("mookAI | Attempted to start combat that is already active.");
@@ -355,6 +355,8 @@ export class MookAI {
   getMook(combat_, tokenId_) {
     if (!combat_) throw "Invalid combat";
 
+    if (!tokenId_)
+      throw `tokenId_ is null. I think this is because combat has not yet started.`;
     if (!combat_.has(tokenId_))
       return this.addCombatant(game.combat.id, tokenId_);
 
