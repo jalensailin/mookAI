@@ -9,8 +9,16 @@
   "dependencies": [
     {
       "name": "lib-find-the-path"
-    }],
-  "esmodules": ["scripts/behaviors.js", "scripts/main.js", "scripts/mook.js", "scripts/mookAI.js", "scripts/mookModel.js", "scripts/mookModelSettings.js"],
+    }
+  ],
+  "esmodules": [
+    "scripts/behaviors.js",
+    "scripts/main.js",
+    "scripts/mook.js",
+    "scripts/mookAI.js",
+    "scripts/mookModel.js",
+    "scripts/mookModelSettings.js"
+  ],
   "styles": [],
   "systems": ["dnd5e"],
   "url": "https://github.com/dwonderley/mookAI",
