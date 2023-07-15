@@ -23,11 +23,7 @@ If this is done, the module should be able to support those systems without addi
 
 At the moment, I am prioritizing functionality and bug fixes and have no plans to support other systems. However, if you want to implement a MookModel for the system you play, I will be happy to work with you and to review and merge in your code
 */
-import {
-  MookModelSettings,
-  MookModelSettings5e,
-  MookInitiative,
-} from "./mookModelSettings.js";
+import { MookModelSettings, MookModelSettings5e, MookInitiative } from "./mookModelSettings.js";
 
 /*
 Actions are objects that contain:
@@ -124,11 +120,7 @@ export class MookModel {
   static getMookModel(token_, ...args_) {
     switch (game.system.id) {
       case "dnd5e":
-        return new MookModel5e(
-          token_,
-          new MookModelSettings5e(token_),
-          ...args_
-        );
+        return new MookModel5e(token_, new MookModelSettings5e(token_), ...args_);
     }
 
     return null;
@@ -241,9 +233,7 @@ export class MookModel {
     return this._targetHistory.length === 0 ? null : this._targetHistory[0];
   }
   get lastTarget() {
-    return this._targetHistory.length === 0
-      ? null
-      : this._targetHistory[this._targetHistory.length - 1];
+    return this._targetHistory.length === 0 ? null : this._targetHistory[this._targetHistory.length - 1];
   }
   get targetHistory() {
     return this._targetHistory;
@@ -306,7 +296,7 @@ class MookModel5e extends MookModel {
     if (game.modules.get("betterrolls5e")?.active) {
       BetterRolls.quickRoll(name_);
     } else {
-      game.dnd5e.rollItemMacro(name_);
+      game.dnd5e.documents.macro.rollItem(name_);
     }
   }
 
@@ -324,8 +314,7 @@ class MookModel5e extends MookModel {
         if (a.data.duration === "full") {
           if (this.actionsUsed >= this.settings.actionsPerTurn) return;
 
-          for (let i = 0; i < this.settings.attacksPerAction; ++i)
-            this.doAttack(name);
+          for (let i = 0; i < this.settings.attacksPerAction; ++i) this.doAttack(name);
 
           ++this.actionsUsed;
           // todo: a.act is doAttack
@@ -333,15 +322,13 @@ class MookModel5e extends MookModel {
         } else if (a.data.duration === "bonus") {
           if (this.bonusActionUsed) return;
 
-          for (let i = 0; i < this.settings.attacksPerBonusAction; ++i)
-            this.doAttack(name);
+          for (let i = 0; i < this.settings.attacksPerBonusAction; ++i) this.doAttack(name);
 
           this.bonusActionUsed = true;
           a.act();
           return;
         } else {
-          for (let i = 0; i < this.settings.attacksPerFreeAction; ++i)
-            this.doAttack(name);
+          for (let i = 0; i < this.settings.attacksPerFreeAction; ++i) this.doAttack(name);
 
           a.act();
           return;
@@ -362,25 +349,14 @@ class MookModel5e extends MookModel {
       };
 
       for (let i = 0; i < this.settings.dashActionsPerTurn; ++i)
-        this._actions.push(
-          new Ability("dash", { duration: "full", act: dashAct })
-        );
-      if (this.hasDashBonusAction)
-        this._actions.push(
-          new Ability("dash", { duration: "bonus", act: dashAct })
-        );
-      if (this.hasDashFreeAction)
-        this._actions.push(
-          new Ability("dash", { duration: "free", act: dashAct })
-        );
+        this._actions.push(new Ability("dash", { duration: "full", act: dashAct }));
+      if (this.hasDashBonusAction) this._actions.push(new Ability("dash", { duration: "bonus", act: dashAct }));
+      if (this.hasDashFreeAction) this._actions.push(new Ability("dash", { duration: "free", act: dashAct }));
     }
 
-    for (let i = 0; i < this.settings.actionsPerTurn; ++i)
-      this._actions.push(new Ability("attack", { duration: "full" }));
-    if (this.settings.hasBonusAttack)
-      this._actions.push(new Ability("attack", { duration: "bonus" }));
-    if (this.settings.hasFreeAttack)
-      this._actions.push(new Ability("attack", { duration: "free" }));
+    for (let i = 0; i < this.settings.actionsPerTurn; ++i) this._actions.push(new Ability("attack", { duration: "full" }));
+    if (this.settings.hasBonusAttack) this._actions.push(new Ability("attack", { duration: "bonus" }));
+    if (this.settings.hasFreeAttack) this._actions.push(new Ability("attack", { duration: "free" }));
   }
 
   zoom() {
@@ -458,34 +434,18 @@ class MookModel5e extends MookModel {
   get canAttack() {
     const attacks = this._actions.filter((a) => a.type === "attack");
 
-    if (
-      this.actionsUsed < this.settings.actionsPerTurn &&
-      attacks.some((a) => a.data.duration === "full" && a.can())
-    )
-      return true;
+    if (this.actionsUsed < this.settings.actionsPerTurn && attacks.some((a) => a.data.duration === "full" && a.can())) return true;
 
-    if (
-      !this.bonusActionUsed &&
-      attacks.some((a) => a.data.duration === "bonus" && a.can())
-    )
-      return true;
+    if (!this.bonusActionUsed && attacks.some((a) => a.data.duration === "bonus" && a.can())) return true;
 
     return attacks.some((a) => a.data.duration === "free" && a.can());
   }
   get canZoom() {
     const dashes = this._actions.filter((a) => a.type === "dash");
 
-    if (
-      this.actionsUsed < this.settings.actionsPerTurn &&
-      dashes.some((a) => a.data.duration === "full" && a.can())
-    )
-      return true;
+    if (this.actionsUsed < this.settings.actionsPerTurn && dashes.some((a) => a.data.duration === "full" && a.can())) return true;
 
-    if (
-      !this.bonusActionUsed &&
-      dashes.some((a) => a.data.duration === "bonus" && a.can())
-    )
-      return true;
+    if (!this.bonusActionUsed && dashes.some((a) => a.data.duration === "bonus" && a.can())) return true;
 
     return dashes.some((a) => a.data.duration === "free" && a.can());
   }
@@ -508,19 +468,13 @@ class MookModel5e extends MookModel {
     return this.settings.hasDashFreeAction;
   }
   get useDashAction() {
-    return (
-      this.settings.useDashAction &&
-      (this.hasDashAction || this.hasDashBonusAction || this.hasDashFreeAction)
-    );
+    return this.settings.useDashAction && (this.hasDashAction || this.hasDashBonusAction || this.hasDashFreeAction);
   }
 
   // A measure of the amount of time a mook has to do stuff
   // todo: evaluate units
   get time() {
-    let speed = parseInt(
-      this.token.actor.data.data.attributes.movement.walk,
-      10
-    );
+    let speed = parseInt(this.token.actor.data.data.attributes.movement.walk, 10);
 
     if (!speed) speed = 30;
 
@@ -529,10 +483,6 @@ class MookModel5e extends MookModel {
   get zoomsPerTurn() {
     if (!this.useDashAction) return 0;
 
-    return (
-      this.settings.dashActionsPerTurn +
-      this.hasDashBonusAction +
-      this.hasDashFreeAction
-    );
+    return this.settings.dashActionsPerTurn + this.hasDashBonusAction + this.hasDashFreeAction;
   }
 }
