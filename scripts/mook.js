@@ -410,7 +410,7 @@ export class Mook {
   async cleanup() {
     // todo: Undo all actions
     this.utility.clearHighlights();
-    this.clearTargets();
+    // this.clearTargets();
     await this.endTurn();
   }
 
